@@ -1,8 +1,3 @@
-# requires:
-	# a0 = base address of asciiz string
-# effects:
-	# prints to stdout the content of the string
-
 .macro push reg
 	addi $sp, $sp, -4
 	sw \reg, 0($sp)
@@ -15,6 +10,12 @@
 
 	.text
 	.globl print_asciiz
+# print_asciiz(a0) prints to stdout the content of the zero-terminated string whose address is contained in a0.
+#
+# Dependends on: strlen
+#
+# Parameters:
+# a0 = base address of the asciiz string.
 print_asciiz:
 	push $ra
 	push $s0

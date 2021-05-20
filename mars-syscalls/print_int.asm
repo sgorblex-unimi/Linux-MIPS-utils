@@ -8,12 +8,15 @@
 	addi $sp, $sp, 4
 .endm
 
-.text
-
-# print_int(a0)
+	.text
+	.globl print_int
+# print_int(a0) prints to stdout the signed number contained in a0.
+#
+# Parameters:
 # a0: number to be printed
-# errors (a3): 1 = failed brk or write
-.globl print_int
+#
+# Errors:
+# a3 = 1 if failed brk or write
 print_int:
 	push $s0
 	push $s1
@@ -48,7 +51,7 @@ print_int:
 
 loop:
 	beqz $s0, checkneg	# end loop if s0=0
-	addi $a1, $a1, -1 	# a1: beginning of string	
+	addi $a1, $a1, -1
 	div $s0, $t0
 	mflo $s0		# s0 /= 10
 	mfhi $t1		# t1 = s0%10
@@ -58,14 +61,14 @@ loop:
 
 zero:
 	li $t1, '0'
-	addi $a1, $a1, -1 	# a1: beginning of string	
+	addi $a1, $a1, -1
 	sb $t1, 0($a1)
 
 checkneg:
 	# minus if negative
 	beqz $s3, print
 	li $t1, '-'
-	addi $a1, $a1, -1 	# a1: beginning of string	
+	addi $a1, $a1, -1
 	sb $t1, 0($a1)
 
 print:

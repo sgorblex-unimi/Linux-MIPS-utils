@@ -1,10 +1,12 @@
-# requires:
-	# a0 = base address of asciiz string
-# effects:
-	# v0 = length of the string
-
 	.text
 	.globl strlen
+# strlen(a0) returns the length of the zero-terminated string whose base address is contained in a0.
+#
+# Parameters:
+# a0 = base address of the string
+#
+# Return values:
+# v0 = length of the string
 strlen:
 	li $v0, 0
 loop:
