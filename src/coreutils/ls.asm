@@ -31,6 +31,11 @@ dir: 	.asciiz "."
 	sc 4141
 .endm
 
+.macro pop reg
+	lw \reg, 0($sp)
+	addi $sp, $sp, 4
+.endm
+
 aa: .asciiz "AAAAAAAAA\n"
 .macro test
 	li $a0, 1
@@ -59,25 +64,32 @@ tab:	.ascii "\t"
 
 	.text
 .globl __start
-########################################
-#         This program is WIP!         #
-########################################
 # TODO:
 # - check errors in calls
 # - filetype (define?)
 # - better usage of registers (s)
 __start:
+	pop $t1
+	addi $s0, $s0, -1		# number of files in s0
+	pop $t0				# ignoring first argument
+
+	beq $t1, 1, cwd
+	pop $a0				# ignoring first argument
+	j open
+cwd:
 	la $a0, dir
+
+open:
 	move $a1, $zero
 	open
 
-	move $s0, $v0 		# file descriptor in s0
+	move $s0, $v0 			# file descriptor in s0
 
-	addi $s1, $zero, 1024 	# buffer size in s1
+	addi $s1, $zero, 1024 		# buffer size in s1
 	move $a0, $s1
 	jal sbrk
 
-	move $s2, $v0  		# buffer in s2
+	move $s2, $v0  			# buffer in s2
 
 	bufloop:
 		move $a0, $s0
