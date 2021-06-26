@@ -25,7 +25,6 @@ print_int:
 
 	move $s0, $a0
 
-	# recupero pr_bk
 	li $v0, 4045
 	li $a0, 0
 	syscall			# brk(0)
@@ -82,15 +81,13 @@ print:
 	syscall
 	beq $v0, $s2, error
 	
-	j end
-
-error:
-	li $a3, 1
-	j end
-
 end:
 	pop $s3
 	pop $s2
 	pop $s1
 	pop $s0
 	jr $ra
+
+error:
+	li $a3, 1
+	j end
