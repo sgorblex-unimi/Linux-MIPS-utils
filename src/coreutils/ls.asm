@@ -64,6 +64,25 @@ tab:	.ascii "\t"
 
 .set BUFSIZE,1024
 
+.set		DT_UNKN,0
+ST_UNKN:	.asciiz	"?????\t"
+.set		DT_FIFO,1
+ST_FIFO:	.asciiz	"FIFO\t"
+.set		DT_CHR,2
+ST_CHR:		.asciiz	"char dev"
+.set		DT_DIR,4
+ST_DIR:		.asciiz	"directory"
+.set		DT_BLK,6
+ST_BLK:		.asciiz	"block dev"
+.set		DT_REG,8
+ST_REG:		.asciiz	"regular\t"
+.set		DT_LNK,10
+ST_LNK:		.asciiz	"symlink\t"
+.set		DT_SOCK,12
+ST_SOCK:	.asciiz	"socket\t"
+.set		DT_WHT,14
+ST_WHT:		.asciiz	"whiteout"
+
 	.text
 .globl __start
 # TODO:
@@ -100,7 +119,7 @@ open:
 		beqz $v0, end
 		move $s3, $v0 		# bytes read in s3
 
-		move $s4, $zero 	# position in buffer in s4
+		move $s4, $zero 	# relative position in buffer in s4
 
 		loopfiles:
 			bge $s4, $s3, endloopfiles
@@ -109,12 +128,52 @@ open:
 			lw $a0, 0($s5) 		# inode number
 			jal print_int
 			printchar tab
-			addi $a0, $s5, 10 	# filename
-			jal print_asciiz
-			printchar nl
 			lw $t0, 8($s5) 		# reclen
 			srl $t0, $t0, 16
 			add $s4, $s4, $t0
+			add $t0, $s2, $s4
+			lb $t0, -1($t0)
+			beq $t0, DT_FIFO, FIFO
+			beq $t0, DT_CHR, CHR
+			beq $t0, DT_DIR, DIR
+			beq $t0, DT_BLK, BLK
+			beq $t0, DT_REG, REG
+			beq $t0, DT_LNK, LNK
+			beq $t0, DT_SOCK, SOCK
+			beq $t0, DT_WHT, WHT
+			la $a0, DT_UNKN
+			j filetype
+		FIFO:
+			la $a0, ST_FIFO
+			j filetype
+		CHR:
+			la $a0, ST_CHR
+			j filetype
+		DIR:
+			la $a0, ST_DIR
+			j filetype
+		BLK:
+			la $a0, ST_BLK
+			j filetype
+		REG:
+			la $a0, ST_REG
+			j filetype
+		LNK:
+			la $a0, ST_LNK
+			j filetype
+		SOCK:
+			la $a0, ST_SOCK
+			j filetype
+		WHT:
+			la $a0, ST_WHT
+
+		filetype:
+			jal print_asciiz
+			printchar tab
+
+			addi $a0, $s5, 10 	# filename
+			jal print_asciiz
+			printchar nl
 			j loopfiles
 
 		endloopfiles:
