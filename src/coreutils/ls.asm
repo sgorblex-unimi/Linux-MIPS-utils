@@ -62,6 +62,8 @@ tab:	.ascii "\t"
 	printchar nl
 .endm
 
+.set BUFSIZE,1024
+
 	.text
 .globl __start
 # TODO:
@@ -85,8 +87,7 @@ open:
 
 	move $s0, $v0 			# file descriptor in s0
 
-	addi $s1, $zero, 1024 		# buffer size in s1
-	move $a0, $s1
+	addi $a0, $zero, BUFSIZE
 	jal sbrk
 
 	move $s2, $v0  			# buffer in s2
@@ -94,7 +95,7 @@ open:
 	bufloop:
 		move $a0, $s0
 		move $a1, $s2
-		addi $a2, $zero, 1024
+		addi $a2, $zero, BUFSIZE
 		getdents
 		beqz $v0, end
 		move $s3, $v0 		# bytes read in s3

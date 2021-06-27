@@ -25,6 +25,8 @@
 	addi $sp, $sp, 4
 .endm
 
+.set BUFSIZE,1024
+
 	.text
 .globl __start
 # TODO:
@@ -34,30 +36,29 @@ __start:
 	addi $s0, $s0, -1			# number of files in s0
 	pop $t0					# ignoring first argument
 
-	addi $s1, $zero, 1024 			# buffer size in s1
-	move $a0, $s1                   	
+	addi $a0, $zero, BUFSIZE
 	jal sbrk                        	
-	move $s2, $v0  				# buffer address in s2
+	move $s1, $v0  				# buffer address in s1
 
 	loopfiles:
 		beqz $s0, end
 		pop $a0				# filename in t0
 		move $a1, $zero			# open flags
 		open
-		move $s3, $v0 			# file descriptor in s3
+		move $s2, $v0 			# file descriptor in s2
 		loopbuffer:
-			move $a0, $s3
-			move $a1, $s2
-			move $a2, $s1
+			move $a0, $s2
+			move $a1, $s1
+			addi $a2, $zero, BUFSIZE
 			read
-			move $s4, $v0
+			move $s3, $v0
 
 			addi $a0, $zero, 1
-			move $a1, $s2
-			move $a2, $s4
+			move $a1, $s1
+			move $a2, $s3
 			write
 
-			beq $s4, $s1, loopbuffer
+			beq $s3, BUFSIZE, loopbuffer
 		addi $s0, $s0, -1
 		j loopfiles
 	end:
