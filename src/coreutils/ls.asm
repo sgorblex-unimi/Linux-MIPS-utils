@@ -1,10 +1,3 @@
-	.data
-dir: 	.asciiz "."
-
-# flags for open:
-# O_RDONLY          = 00000000
-# (O_DIRECTORY)
-
 .macro sc num
 	addi $v0, $zero, \num
 	syscall
@@ -22,8 +15,8 @@ dir: 	.asciiz "."
 	sc 4004
 .endm
 
-.macro exit
-	move $a0, $zero
+.macro exit code
+	addi $a0, $zero, \code
 	sc 4001
 .endm
 
@@ -34,14 +27,6 @@ dir: 	.asciiz "."
 .macro pop reg
 	lw \reg, 0($sp)
 	addi $sp, $sp, 4
-.endm
-
-aa: .asciiz "AAAAAAAAA\n"
-.macro test
-	li $a0, 1
-	la $a1, aa
-	li $a2, 10
-	write
 .endm
 
 nl:	.ascii "\n"
@@ -83,12 +68,24 @@ ST_SOCK:	.asciiz	"socket\t"
 .set		DT_WHT,14
 ST_WHT:		.asciiz	"whiteout"
 
+
+	.data
+
+dir: 	.asciiz "."
+errmsg: .asciiz "ERROR: cannot open the specified directory.\n"
+
+
 	.text
 .globl __start
 # TODO:
 # - check errors in calls
 # - filetype (define?)
 # - better usage of registers (s)
+# - fix flags (see under)
+#
+# flags for open:
+# O_RDONLY          = 00000000
+# (O_DIRECTORY)
 __start:
 	pop $t1
 	addi $s0, $s0, -1		# number of files in s0
@@ -103,6 +100,8 @@ cwd:
 open:
 	move $a1, $zero
 	open
+
+	bnez $a3, error
 
 	move $s0, $v0 			# file descriptor in s0
 
@@ -180,4 +179,9 @@ open:
 			j bufloop
 
 	end:
-		exit
+		exit 0
+
+	error:
+		la $a0, errmsg
+		jal print_asciiz
+		exit 1

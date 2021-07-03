@@ -15,8 +15,8 @@
 	sc 4004
 .endm
 
-.macro exit
-	move $a0, $zero
+.macro exit code
+	addi $a0, $zero, \code
 	sc 4001
 .endm
 
@@ -26,6 +26,12 @@
 .endm
 
 .set BUFSIZE,1024
+
+
+	.data
+
+errmsg: .ascii "ERROR: cannot open one of the specified files.\n"
+
 
 	.text
 .globl __start
@@ -45,6 +51,7 @@ __start:
 		pop $a0				# filename in t0
 		move $a1, $zero			# open flags
 		open
+		bnez $a3, error
 		move $s2, $v0 			# file descriptor in s2
 		loopbuffer:
 			move $a0, $s2
@@ -62,4 +69,11 @@ __start:
 		addi $s0, $s0, -1
 		j loopfiles
 	end:
-		exit
+		exit 0
+
+	error:
+		addi $a0, $zero, 1
+		la $a1, errmsg
+		addi $a2, $zero, 47
+		write
+		exit 1
