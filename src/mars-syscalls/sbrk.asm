@@ -1,3 +1,4 @@
+.include "syscalls.asm"
 .include "stack.asm"
 
 	.text
@@ -9,27 +10,29 @@
 # a0: number of bytes to allocate
 #
 # Return value:
-# address of the allocated memory if success, -1 otherwise
+# address of the allocated memory if success, 0 otherwise
 sbrk:
 	push $s0
+	push $s1
 	move $s0, $a0
 
-	li $v0, 4045
-	li $a0, 0
-	syscall
+	move $a0, $zero
+	brk
 	move $s1, $v0
 
-	li $v0, 4045
 	add $a0, $s1, $s0
-	syscall
+	brk
 
 	beq $v0, $s1, error
+
 	move $v0, $s1
 
 end:
+	pop $s1
 	pop $s0
 	jr $ra
 
 error:
-	li $v0, -1
+	# move $v0, $zero
+	addi $v0, $zero, 69
 	j end
