@@ -1,36 +1,16 @@
-.macro sc num
-	addi $v0, $zero, \num
-	syscall
-.endm
+.include "stack.asm"
+.include "syscalls.asm"
+.include "dirent.asm"
 
-.macro open
-	sc 4005
-.endm
 
-.macro read
-	sc 4003
-.endm
-
-.macro write
-	sc 4004
-.endm
-
-.macro exit code
-	addi $a0, $zero, \code
-	sc 4001
-.endm
-
-.macro getdents
-	sc 4141
-.endm
-
-.macro pop reg
-	lw \reg, 0($sp)
-	addi $sp, $sp, 4
-.endm
+	.data
 
 nl:	.ascii "\n"
 tab:	.ascii "\t"
+
+
+	.bss
+
 .macro printchar charaddr
 	li $a0, 1
 	la $a1, \charaddr
@@ -38,38 +18,19 @@ tab:	.ascii "\t"
 	write
 .endm
 
-.macro prbrk
-	add $a0, $zero, $zero
-	addi $v0, $zero, 4045
-	syscall
-	move $a0, $v0
-	jal print_int
-	printchar nl
-.endm
-
-.set BUFSIZE,1024
-
-.set		DT_UNKN,0
-ST_UNKN:	.asciiz	"?????\t"
-.set		DT_FIFO,1
-ST_FIFO:	.asciiz	"FIFO\t"
-.set		DT_CHR,2
-ST_CHR:		.asciiz	"char dev"
-.set		DT_DIR,4
-ST_DIR:		.asciiz	"directory"
-.set		DT_BLK,6
-ST_BLK:		.asciiz	"block dev"
-.set		DT_REG,8
-ST_REG:		.asciiz	"regular\t"
-.set		DT_LNK,10
-ST_LNK:		.asciiz	"symlink\t"
-.set		DT_SOCK,12
-ST_SOCK:	.asciiz	"socket\t"
-.set		DT_WHT,14
-ST_WHT:		.asciiz	"whiteout"
+.set	BUFSIZE,1024
 
 
 	.data
+ST_UNKN:	.asciiz	"?????\t"
+ST_FIFO:	.asciiz	"FIFO\t"
+ST_CHR:		.asciiz	"char dev"
+ST_DIR:		.asciiz	"directory"
+ST_BLK:		.asciiz	"block dev"
+ST_REG:		.asciiz	"regular\t"
+ST_LNK:		.asciiz	"symlink\t"
+ST_SOCK:	.asciiz	"socket\t"
+ST_WHT:		.asciiz	"whiteout"
 
 dir: 	.asciiz "."
 errmsg: .asciiz "ERROR: cannot open the specified directory.\n"
@@ -79,7 +40,6 @@ errmsg: .asciiz "ERROR: cannot open the specified directory.\n"
 .globl __start
 # TODO:
 # - check errors in calls
-# - filetype (define?)
 # - better usage of registers (s)
 # - fix flags (see under)
 #

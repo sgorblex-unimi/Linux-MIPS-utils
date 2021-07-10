@@ -1,14 +1,7 @@
-.macro push reg
-	addi $sp, $sp, -4
-	sw \reg, 0($sp)
-.endm
-
-.macro pop reg
-	lw \reg, 0($sp)
-	addi $sp, $sp, 4
-.endm
+.include "stack.asm"
 
 	.text
+
 	.globl sbrk
 # sbrk(a0) allocates a0 bytes after the program break.
 #

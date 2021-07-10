@@ -1,14 +1,7 @@
-.macro push reg
-	addi $sp, $sp, -4
-	sw \reg, 0($sp)
-.endm
-
-.macro pop reg
-	lw \reg, 0($sp)
-	addi $sp, $sp, 4
-.endm
+.include "stack.asm"
 
 	.text
+
 	.globl print_asciiz
 # print_asciiz(a0) prints to stdout the content of the zero-terminated string whose address is contained in a0.
 #

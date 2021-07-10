@@ -1,5 +1,5 @@
 AS	 = as
-ASFLAGS  =
+ASFLAGS  = -I src/as
 
 LINKER   = ld
 LFLAGS   =

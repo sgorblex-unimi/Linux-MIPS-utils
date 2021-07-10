@@ -1,14 +1,7 @@
-.macro push reg
-	addi $sp, $sp, -4
-	sw \reg, 0($sp)
-.endm
-
-.macro pop reg
-	lw \reg, 0($sp)
-	addi $sp, $sp, 4
-.endm
+.include "stack.asm"
 
 	.text
+
 	.globl print_int
 # print_int(a0) prints to stdout the signed number contained in a0.
 #

@@ -1,32 +1,7 @@
-.macro sc num
-	addi $v0, $zero, \num
-	syscall
-.endm
-
-.macro open
-	sc 4005
-.endm
-
-.macro read
-	sc 4003
-.endm
-
-.macro write
-	sc 4004
-.endm
-
-.macro exit code
-	addi $a0, $zero, \code
-	sc 4001
-.endm
-
-.macro pop reg
-	lw \reg, 0($sp)
-	addi $sp, $sp, 4
-.endm
+.include "stack.asm"
+.include "syscalls.asm"
 
 .set BUFSIZE,1024
-
 
 	.data
 
@@ -34,6 +9,7 @@ errmsg: .ascii "ERROR: cannot open one of the specified files.\n"
 
 
 	.text
+
 .globl __start
 # TODO:
 # - standard input when no files specified
