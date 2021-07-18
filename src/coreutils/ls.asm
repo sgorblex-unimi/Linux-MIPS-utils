@@ -1,4 +1,3 @@
-.include "stack.asm"
 .include "syscalls.asm"
 .include "dirent.asm"
 
@@ -22,6 +21,7 @@ tab:	.ascii "\t"
 
 
 	.data
+
 ST_UNKN:	.asciiz	"?????\t"
 ST_FIFO:	.asciiz	"FIFO\t"
 ST_CHR:		.asciiz	"char dev"
@@ -32,66 +32,58 @@ ST_LNK:		.asciiz	"symlink\t"
 ST_SOCK:	.asciiz	"socket\t"
 ST_WHT:		.asciiz	"whiteout"
 
-dir: 	.asciiz "."
-errmsg: .asciiz "ERROR: cannot open the specified directory.\n"
+dir: 		.asciiz "."
+errmsg: 	.asciiz "ERROR: cannot open the specified directory.\n"
 
 
 	.text
+
 .globl __start
 # TODO:
 # - check errors in calls
-# - better usage of registers (s)
 # - fix flags (see under)
 #
 # flags for open:
 # O_RDONLY          = 00000000
-# (O_DIRECTORY)
+# (O_DIRECTORY) note: this is probably not needed if checking getdents errors
 __start:
-	pop $t1
-	addi $s0, $s0, -1		# number of files in s0
-	pop $t0				# ignoring first argument
+	lw $t0, 0($sp)			# t0: number of arguments
+	beq $t0, 1, cwd
+	lw $a0, 8($sp)			# a0: directory path
 
-	beq $t1, 1, cwd
-	pop $a0				# ignoring first argument
+	addi $sp, $sp, 12		# stack cleanup
 	j open
 cwd:
 	la $a0, dir
-
 open:
 	move $a1, $zero
 	open
-
 	bnez $a3, error
-
 	move $s0, $v0 			# file descriptor in s0
 
-	addi $a0, $zero, BUFSIZE
-	jal sbrk
-
-	move $s2, $v0  			# buffer in s2
+	addi $sp, $sp, BUFSIZE		# buffer in stack (base address in sp)
 
 	bufloop:
 		move $a0, $s0
-		move $a1, $s2
+		move $a1, $sp
 		addi $a2, $zero, BUFSIZE
 		getdents
 		beqz $v0, end
-		move $s3, $v0 		# bytes read in s3
+		move $s1, $v0 			# s1: bytes read by getdents
 
-		move $s4, $zero 	# relative position in buffer in s4
+		move $s2, $zero 		# s2: relative position in buffer
 
 		loopfiles:
-			bge $s4, $s3, endloopfiles
-			add $s5, $s2, $s4
+			bge $s2, $s1, endloopfiles
+			add $s3, $sp, $s2		# s3: current entry address in buffer
 
-			lw $a0, 0($s5) 		# inode number
-			jal print_int
+			lw $a0, 0($s3) 
+			jal print_int			# print inode number
 			printchar tab
-			lw $t0, 8($s5) 		# reclen
-			srl $t0, $t0, 16
-			add $s4, $s4, $t0
-			add $t0, $s2, $s4
-			lb $t0, -1($t0)
+			lh $t0, 8($s3) 			# reclen (record size)
+			add $s2, $s2, $t0
+			add $t0, $sp, $s2
+			lb $t0, -1($t0)			# filetype code
 			beq $t0, DT_FIFO, FIFO
 			beq $t0, DT_CHR, CHR
 			beq $t0, DT_DIR, DIR
@@ -127,11 +119,11 @@ open:
 			la $a0, ST_WHT
 
 		filetype:
-			jal print_asciiz
+			jal print_asciiz		# print filetype
 			printchar tab
 
-			addi $a0, $s5, 10 	# filename
-			jal print_asciiz
+			addi $a0, $s3, 10 
+			jal print_asciiz		# print filename
 			printchar nl
 			j loopfiles
 
