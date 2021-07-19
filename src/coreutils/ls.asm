@@ -39,13 +39,6 @@ errmsg: 	.asciiz "ERROR: cannot open the specified directory.\n"
 	.text
 
 .globl __start
-# TODO:
-# - check errors in calls
-# - fix flags (see under)
-#
-# flags for open:
-# O_RDONLY          = 00000000
-# (O_DIRECTORY) note: this is probably not needed if checking getdents errors
 __start:
 	lw $t0, 0($sp)			# t0: number of arguments
 	beq $t0, 1, cwd
@@ -68,6 +61,7 @@ open:
 		move $a1, $sp
 		addi $a2, $zero, BUFSIZE
 		getdents
+		bnez $a3, error
 		beqz $v0, end
 		move $s1, $v0 			# s1: bytes read by getdents
 
