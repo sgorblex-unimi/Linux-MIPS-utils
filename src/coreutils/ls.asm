@@ -54,7 +54,7 @@ open:
 	bnez $a3, error
 	move $s0, $v0 			# file descriptor in s0
 
-	addi $sp, $sp, BUFSIZE		# buffer in stack (base address in sp)
+	addi $sp, $sp, -BUFSIZE		# buffer in stack (base address in sp)
 
 	bufloop:
 		move $a0, $s0
