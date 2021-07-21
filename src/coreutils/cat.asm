@@ -1,4 +1,3 @@
-.include "stack.asm"
 .include "syscalls.asm"
 
 .set BUFSIZE,1024
@@ -11,39 +10,42 @@ errmsg: .ascii "ERROR: cannot open one of the specified files.\n"
 	.text
 
 .globl __start
-# TODO:
-# - standard input when no files specified
 __start:
-	pop $s0
-	addi $s0, $s0, -1			# number of files in s0
-	pop $t0					# ignoring first argument
+	lw $s0, 0($sp)
+	addi $s0, $s0, -1			# s0: number of remaining files
+	beqz $s0, stdin
+	addi $s1, $sp, 8			# s1: secondary stack pointer (array of filenames)
 
-	addi $a0, $zero, BUFSIZE
-	jal sbrk                        	
-	move $s1, $v0  				# buffer address in s1
+	addi $sp, $sp, -BUFSIZE
 
 	loopfiles:
 		beqz $s0, end
-		pop $a0				# filename in t0
-		move $a1, $zero			# open flags
+		addi $s0, $s0, -1
+		lw $a0, 0($s1)				# a0: filename
+		addi $s1, $s1, 4
+		move $a1, $zero				# open flags
 		open
 		bnez $a3, error
-		move $s2, $v0 			# file descriptor in s2
+		move $s2, $v0 				# s2: file descriptor
 		loopbuffer:
 			move $a0, $s2
-			move $a1, $s1
+			move $a1, $sp
 			addi $a2, $zero, BUFSIZE
 			read
-			move $s3, $v0
+			beqz $v0, postloopbuffer
 
 			addi $a0, $zero, 1
-			move $a1, $s1
-			move $a2, $s3
+			move $a1, $sp
+			move $a2, $v0
 			write
-
-			beq $s3, BUFSIZE, loopbuffer
-		addi $s0, $s0, -1
+			j loopbuffer
+	postloopbuffer:
 		j loopfiles
+
+	stdin:
+		addi $s2, $zero, 0
+		j loopbuffer
+
 	end:
 		exit 0
 
