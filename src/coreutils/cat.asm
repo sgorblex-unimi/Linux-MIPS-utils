@@ -14,7 +14,7 @@ __start:
 	lw $s0, 0($sp)
 	addi $s0, $s0, -1			# s0: number of remaining files
 	beqz $s0, stdin
-	addi $s1, $sp, 8			# s1: secondary stack pointer (array of filenames)
+	addiu $s1, $sp, 8			# s1: secondary stack pointer (array of filenames)
 
 	addi $sp, $sp, -BUFSIZE
 
@@ -22,7 +22,7 @@ __start:
 		beqz $s0, end
 		addi $s0, $s0, -1
 		lw $a0, 0($s1)				# a0: filename
-		addi $s1, $s1, 4
+		addiu $s1, $s1, 4
 		move $a1, $zero				# open flags
 		open
 		bnez $a3, error

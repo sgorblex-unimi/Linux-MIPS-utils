@@ -8,7 +8,7 @@
 # Return values:
 # v0 = length of the string
 strlen:
-	li $v0, 0
+	addi $v0, $zero, 0
 loop:
 	lb $t0, 0($a0)
 	beqz $t0, exit

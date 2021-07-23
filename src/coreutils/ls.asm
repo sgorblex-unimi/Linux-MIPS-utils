@@ -11,9 +11,9 @@ tab:	.ascii "\t"
 	.bss
 
 .macro printchar charaddr
-	li $a0, 1
+	addi $a0, $zero, 1
 	la $a1, \charaddr
-	li $a2, 1
+	addi $a2, $zero, 1
 	write
 .endm
 

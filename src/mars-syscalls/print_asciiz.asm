@@ -17,8 +17,8 @@ print_asciiz:
 	jal strlen
 	move $a2, $v0
 	move $a1, $s0
-	li $v0, 4004
-	li $a0, 1
+	addi $v0, $zero, 4004
+	addi $a0, $zero, 1
 	syscall
 
 	pop $s0
