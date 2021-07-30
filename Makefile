@@ -24,13 +24,17 @@ all: $(BINARIES)
 
 $(shell mkdir -p $(BINDIR) $(OBJDIR))
 
-LS_DEPS := ls.o print_asciiz.o print_int.o sbrk.o strlen.o
+LS_DEPS := ls.o print_asciiz.o print_int.o strlen.o
 $(BINDIR)/ls: $(LS_DEPS:%=$(OBJDIR)/%)
 	$(LINKER) $(LFLAGS) $(LS_DEPS:%=$(OBJDIR)/%) -o $@
 
-CAT_DEPS := cat.o sbrk.o
+CAT_DEPS := cat.o
 $(BINDIR)/cat: $(CAT_DEPS:%=$(OBJDIR)/%)
 	$(LINKER) $(LFLAGS) $(CAT_DEPS:%=$(OBJDIR)/%) -o $@
+
+MKDIR_DEPS := mkdir.o
+$(BINDIR)/mkdir: $(MKDIR_DEPS:%=$(OBJDIR)/%)
+	$(LINKER) $(LFLAGS) $(MKDIR_DEPS:%=$(OBJDIR)/%) -o $@
 
 $(OBJ_COREUTILS): $(OBJDIR)/%.o : $(SRCDIR_COREUTILS)/%.asm
 	$(AS) $(ASFLAGS) $< -o $@

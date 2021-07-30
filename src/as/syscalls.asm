@@ -21,6 +21,10 @@
 	sc 4005
 .endm
 
+.macro mkdir
+	sc 4039
+.endm
+
 .macro brk
 	sc 4045
 .endm
