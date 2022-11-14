@@ -1,4 +1,5 @@
 # Linux-MIPS-utils
+Collection of examples/exercises of MIPS assembly programming for Linux.
 
 ## Code etiquette
 - use 0b for masks and binary literals
